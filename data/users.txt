@@ -1,0 +1,4 @@
+Student;john;1234
+Supervisor;alex;abcd
+FacultyAdmin;mary;pass
+SystemAdmin;admin;admin
