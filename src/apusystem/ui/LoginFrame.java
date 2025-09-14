@@ -11,30 +11,47 @@ public class LoginFrame extends JFrame {
     private JPasswordField passwordField;
 
     public LoginFrame() {
-        setTitle("Login");
-        setSize(300, 200);
+        setTitle("Система управления университетом - Вход");
+        setSize(350, 250);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(3, 2));
+        setLayout(new GridLayout(4, 2, 5, 5));
 
-        add(new JLabel("Username:"));
+        add(new JLabel("Имя пользователя:"));
         usernameField = new JTextField();
         add(usernameField);
 
-        add(new JLabel("Password:"));
+        add(new JLabel("Пароль:"));
         passwordField = new JPasswordField();
         add(passwordField);
 
-        JButton loginBtn = new JButton("Login");
+        JButton loginBtn = new JButton("Войти");
         loginBtn.addActionListener(e -> login());
         add(loginBtn);
+
+        JButton clearBtn = new JButton("Очистить");
+        clearBtn.addActionListener(e -> {
+            usernameField.setText("");
+            passwordField.setText("");
+        });
+        add(clearBtn);
+
+        // Добавляем обработчик Enter для полей
+        usernameField.addActionListener(e -> passwordField.requestFocus());
+        passwordField.addActionListener(e -> login());
 
         setVisible(true);
     }
 
     private void login() {
-        String username = usernameField.getText();
-        String password = new String(passwordField.getPassword());
+        String username = usernameField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Пожалуйста, заполните все поля", 
+                "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         User user = UserService.login(username, password);
 
@@ -47,7 +64,10 @@ public class LoginFrame extends JFrame {
                 case "SystemAdmin" -> new SystemAdminDashboard((SystemAdmin) user);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid credentials");
+            JOptionPane.showMessageDialog(this, "Неверные учетные данные", 
+                "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+            passwordField.setText("");
+            passwordField.requestFocus();
         }
     }
 }

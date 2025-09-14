@@ -1,0 +1,4 @@
+Student;student1;password123
+Supervisor;supervisor1;password123
+FacultyAdmin;faculty1;password123
+SystemAdmin;admin1;password123
