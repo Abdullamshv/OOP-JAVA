@@ -11,36 +11,151 @@ public class LoginFrame extends JFrame {
     private JPasswordField passwordField;
 
     public LoginFrame() {
-        setTitle("Система управления университетом - Вход");
-        setSize(350, 250);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new GridLayout(4, 2, 5, 5));
+        setTitle("University Management System - Login");
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        add(new JLabel("Имя пользователя:"));
-        usernameField = new JTextField();
-        add(usernameField);
+        // Полноэкранный режим
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        add(new JLabel("Пароль:"));
-        passwordField = new JPasswordField();
-        add(passwordField);
+        // Обработчик закрытия окна
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                int result = JOptionPane.showConfirmDialog(LoginFrame.this,
+                        "Are you sure you want to exit?",
+                        "Exit Application",
+                        JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+            }
+        });
 
-        JButton loginBtn = new JButton("Войти");
+        initializeComponents();
+        setVisible(true);
+    }
+
+    private void initializeComponents() {
+        setLayout(new BorderLayout());
+
+        // Верхняя панель (заголовок)
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(52, 58, 64));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+
+        JLabel titleLabel = new JLabel("University Management System", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        titleLabel.setForeground(Color.WHITE);
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+
+        // Панель формы логина
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+                BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        // Username
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        usernameLabel.setForeground(new Color(73, 80, 87));
+        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(usernameLabel, gbc);
+
+        usernameField = new JTextField(20);
+        usernameField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        usernameField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(usernameField, gbc);
+
+        // Password
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        passwordLabel.setForeground(new Color(73, 80, 87));
+        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE;
+        formPanel.add(passwordLabel, gbc);
+
+        passwordField = new JPasswordField(20);
+        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(passwordField, gbc);
+
+        // Панель кнопок
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        buttonPanel.setBackground(Color.WHITE);
+
+        JButton loginBtn = createStyledButton("Login", new Color(40, 167, 69));
         loginBtn.addActionListener(e -> login());
-        add(loginBtn);
 
-        JButton clearBtn = new JButton("Очистить");
+        JButton clearBtn = createStyledButton("Clear", new Color(108, 117, 125));
         clearBtn.addActionListener(e -> {
             usernameField.setText("");
             passwordField.setText("");
         });
-        add(clearBtn);
 
-        // Добавляем обработчик Enter для полей
-        usernameField.addActionListener(e -> passwordField.requestFocus());
-        passwordField.addActionListener(e -> login());
+        JButton exitBtn = createStyledButton("Exit", new Color(220, 53, 69));
+        exitBtn.addActionListener(e -> {
+            int result = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to exit?",
+                    "Exit Application",
+                    JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        });
 
-        setVisible(true);
+        buttonPanel.add(loginBtn);
+        buttonPanel.add(clearBtn);
+        buttonPanel.add(exitBtn);
+
+        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE;
+        formPanel.add(buttonPanel, gbc);
+
+        // Enter → Login
+        getRootPane().setDefaultButton(loginBtn);
+
+        // Обёртка для центрирования формы
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setBackground(new Color(248, 249, 250));
+        centerWrapper.add(formPanel, new GridBagConstraints());
+
+        // Сборка окна
+        add(headerPanel, BorderLayout.NORTH);
+        add(centerWrapper, BorderLayout.CENTER);
+    }
+
+    private JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        button.setBackground(backgroundColor);
+        button.setForeground(Color.WHITE);
+        button.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor);
+            }
+        });
+
+        return button;
     }
 
     private void login() {
@@ -48,8 +163,7 @@ public class LoginFrame extends JFrame {
         String password = new String(passwordField.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Пожалуйста, заполните все поля", 
-                "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Please fill in all fields", "Login Error");
             return;
         }
 
@@ -64,10 +178,13 @@ public class LoginFrame extends JFrame {
                 case "SystemAdmin" -> new SystemAdminDashboard((SystemAdmin) user);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Неверные учетные данные", 
-                "Ошибка входа", JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Invalid credentials", "Login Error");
             passwordField.setText("");
             passwordField.requestFocus();
         }
+    }
+
+    private void showErrorMessage(String message, String title) {
+        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
     }
 }
