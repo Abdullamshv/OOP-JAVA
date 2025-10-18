@@ -1,266 +1,148 @@
 package apusystem.ui;
 
-import apusystem.users.SystemAdmin;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import apusystem.models.SystemAdminModel;
 
 public class SystemAdminDashboard extends JFrame {
-    private SystemAdmin admin;
+    private SystemAdminModel adminModel;
+    private JTable userTable;
+    private DefaultTableModel tableModel;
 
-    public SystemAdminDashboard(SystemAdmin admin) {
-        this.admin = admin;
-        initializeFrame();
-        initializeComponents();
+    public SystemAdminDashboard(SystemAdminModel adminModel) {
+        this.adminModel = adminModel;
+        setupUI();
+    }
+
+    private void setupUI() {
+        setTitle("System Admin Dashboard");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        // Create table
+        String[] columns = {"Role", "Username", "Password"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        userTable = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(userTable);
+
+        // Create buttons
+        JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        JButton addButton = new JButton("Add User");
+        JButton removeButton = new JButton("Remove User");
+        JButton resetButton = new JButton("Reset Password");
+        JButton refreshButton = new JButton("Refresh");
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(removeButton);
+        buttonPanel.add(resetButton);
+        buttonPanel.add(refreshButton);
+
+        // Add action listeners
+        addButton.addActionListener(e -> showAddUserDialog());
+        removeButton.addActionListener(e -> removeSelectedUser());
+        resetButton.addActionListener(e -> resetSelectedUserPassword());
+        refreshButton.addActionListener(e -> refreshUserTable());
+
+        // Add components to frame
+        add(scrollPane, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.EAST);
+
+        refreshUserTable();
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    private void initializeFrame() {
-        setTitle("System Admin Dashboard - " + admin.getUsername());
-        setSize(900, 700);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        
-        // Use default look and feel
+    private void refreshUserTable() {
+        tableModel.setRowCount(0);
+        String[][] users = SystemAdminModel.getAllUsers();
+        for (String[] user : users) {
+            tableModel.addRow(new String[]{user[0], user[1], "********"});
+        }
     }
 
-    private void initializeComponents() {
-        setLayout(new BorderLayout());
-        
-        // Header panel
-        JPanel headerPanel = createHeaderPanel();
-        
-        // Main content panel
-        JPanel contentPanel = createContentPanel();
-        
-        // Footer panel
-        JPanel footerPanel = createFooterPanel();
-        
-        // Assemble the frame
-        add(headerPanel, BorderLayout.NORTH);
-        add(contentPanel, BorderLayout.CENTER);
-        add(footerPanel, BorderLayout.SOUTH);
-    }
-    
-    private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(220, 53, 69));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        
-        JLabel welcomeLabel = new JLabel("Welcome, " + admin.getUsername() + "!");
-        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        welcomeLabel.setForeground(Color.WHITE);
-        welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        JLabel roleLabel = new JLabel("System Administration Portal");
-        roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        roleLabel.setForeground(new Color(255, 200, 200));
-        roleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        headerPanel.setLayout(new BorderLayout());
-        headerPanel.add(welcomeLabel, BorderLayout.CENTER);
-        headerPanel.add(roleLabel, BorderLayout.SOUTH);
-        
-        return headerPanel;
-    }
-    
-    private JPanel createContentPanel() {
-        JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(248, 249, 250));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(15, 15, 15, 15);
-        
-        // System management section
-        JPanel systemPanel = createSystemPanel();
-        gbc.gridx = 0; gbc.gridy = 0; gbc.fill = GridBagConstraints.BOTH;
-        contentPanel.add(systemPanel, gbc);
-        
-        // User management section
-        JPanel userPanel = createUserManagementPanel();
-        gbc.gridx = 1; gbc.gridy = 0; gbc.fill = GridBagConstraints.BOTH;
-        contentPanel.add(userPanel, gbc);
-        
-        // System status section
-        JPanel statusPanel = createSystemStatusPanel();
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.BOTH;
-        contentPanel.add(statusPanel, gbc);
-        
-        return contentPanel;
-    }
-    
-    private JPanel createSystemPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        
-        JLabel titleLabel = new JLabel("System Management");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titleLabel.setForeground(new Color(52, 58, 64));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(titleLabel);
-        
-        panel.add(Box.createVerticalStrut(20));
-        
-        JButton systemSettingsBtn = createActionButton("System Settings", new Color(40, 167, 69));
-        JButton backupRestoreBtn = createActionButton("Backup & Restore", new Color(0, 123, 255));
-        JButton securityBtn = createActionButton("Security Settings", new Color(255, 193, 7));
-        JButton maintenanceBtn = createActionButton("System Maintenance", new Color(108, 117, 125));
-        
-        panel.add(systemSettingsBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(backupRestoreBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(securityBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(maintenanceBtn);
-        
-        return panel;
-    }
-    
-    private JPanel createUserManagementPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        
-        JLabel titleLabel = new JLabel("User Management");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titleLabel.setForeground(new Color(52, 58, 64));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(titleLabel);
-        
-        panel.add(Box.createVerticalStrut(20));
-        
-        JButton manageUsersBtn = createActionButton("Manage Users", new Color(40, 167, 69));
-        JButton userRolesBtn = createActionButton("User Roles", new Color(0, 123, 255));
-        JButton auditLogBtn = createActionButton("Audit Log", new Color(255, 193, 7));
-        JButton permissionsBtn = createActionButton("Permissions", new Color(108, 117, 125));
-        
-        panel.add(manageUsersBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(userRolesBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(auditLogBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(permissionsBtn);
-        
-        return panel;
-    }
-    
-    private JPanel createSystemStatusPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        
-        JLabel titleLabel = new JLabel("System Status");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titleLabel.setForeground(new Color(52, 58, 64));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(titleLabel);
-        
-        panel.add(Box.createVerticalStrut(20));
-        
-        // System status indicators
-        String[] statusItems = {
-            "Database: Online",
-            "File System: Healthy",
-            "User Sessions: 15 active",
-            "Last Backup: 2 hours ago"
-        };
-        
-        for (String item : statusItems) {
-            JPanel statusPanel = new JPanel(new BorderLayout());
-            statusPanel.setBackground(new Color(248, 249, 250));
-            statusPanel.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-            
-            JLabel statusLabel = new JLabel(item);
-            statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-            statusLabel.setForeground(new Color(73, 80, 87));
-            
-            JLabel statusIcon = new JLabel("●");
-            statusIcon.setFont(new Font("Segoe UI", Font.BOLD, 16));
-            statusIcon.setForeground(new Color(40, 167, 69));
-            
-            statusPanel.add(statusLabel, BorderLayout.CENTER);
-            statusPanel.add(statusIcon, BorderLayout.EAST);
-            
-            panel.add(statusPanel);
-            panel.add(Box.createVerticalStrut(8));
+    private void showAddUserDialog() {
+        String[] roles = {"Student", "Supervisor", "FacultyAdmin", "SystemAdmin"};
+        JComboBox<String> roleBox = new JComboBox<>(roles);
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+        panel.add(new JLabel("Role:"));
+        panel.add(roleBox);
+        panel.add(new JLabel("Username:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, 
+            "Add New User", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String role = (String) roleBox.getSelectedItem();
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            if (adminModel.addUser(role, username, password)) {
+                JOptionPane.showMessageDialog(this, "User added successfully");
+                refreshUserTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to add user");
+            }
         }
-        
-        return panel;
     }
-    
-    private JButton createActionButton(String text, Color backgroundColor) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        button.setBackground(backgroundColor);
-        button.setForeground(Color.WHITE);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setMaximumSize(new Dimension(200, 35));
-        
-        // Add hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor.darker());
+
+    private void removeSelectedUser() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a user to remove");
+            return;
+        }
+
+        String username = (String) userTable.getValueAt(selectedRow, 1);
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to remove user: " + username,
+            "Confirm Remove", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (adminModel.removeUser(username)) {
+                JOptionPane.showMessageDialog(this, "User removed successfully");
+                refreshUserTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to remove user");
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor);
-            }
-        });
-        
-        return button;
+        }
     }
-    
-    private JPanel createFooterPanel() {
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footerPanel.setBackground(new Color(248, 249, 250));
-        footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+    private void resetSelectedUserPassword() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a user");
+            return;
+        }
+
+        String username = (String) userTable.getValueAt(selectedRow, 1);
+        JPasswordField passwordField = new JPasswordField();
         
-        JButton logoutBtn = createStyledButton("Logout", new Color(220, 53, 69));
-        logoutBtn.addActionListener(e -> {
-            dispose();
-            new LoginFrame();
-        });
-        
-        footerPanel.add(logoutBtn);
-        return footerPanel;
-    }
-    
-    private JButton createStyledButton(String text, Color backgroundColor) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        button.setBackground(backgroundColor);
-        button.setForeground(Color.WHITE);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        // Add hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor.darker());
+        int result = JOptionPane.showConfirmDialog(this,
+            new Object[]{"Enter new password for " + username + ":", passwordField},
+            "Reset Password",
+            JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String newPassword = new String(passwordField.getPassword());
+            if (adminModel.updatePassword(username, newPassword)) {
+                JOptionPane.showMessageDialog(this, "Password reset successful");
+                refreshUserTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to reset password");
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor);
-            }
-        });
-        
-        return button;
+        }
     }
 }

@@ -2,6 +2,7 @@ package apusystem.ui;
 
 import apusystem.services.UserService;
 import apusystem.users.*;
+import apusystem.models.SystemAdminModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,7 +176,7 @@ public class LoginFrame extends JFrame {
                 case "Student" -> new StudentDashboard((Student) user);
                 case "Supervisor" -> new SupervisorDashboard((Supervisor) user);
                 case "FacultyAdmin" -> new FacultyAdminDashboard((FacultyAdmin) user);
-                case "SystemAdmin" -> new SystemAdminDashboard((SystemAdmin) user);
+                case "SystemAdmin" -> new SystemAdminDashboard((SystemAdminModel) user);
             }
         } else {
             showErrorMessage("Invalid credentials", "Login Error");
