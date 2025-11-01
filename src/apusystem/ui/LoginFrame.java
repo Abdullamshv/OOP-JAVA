@@ -3,6 +3,7 @@ package apusystem.ui;
 import apusystem.services.UserService;
 import apusystem.users.*;
 import apusystem.models.SystemAdminModel;
+import apusystem.models.FacultyAdminModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,7 +176,7 @@ public class LoginFrame extends JFrame {
             switch (user.getRole()) {
                 case "Student" -> new StudentDashboard((Student) user);
                 case "Supervisor" -> new SupervisorDashboard((Supervisor) user);
-                case "FacultyAdmin" -> new FacultyAdminDashboard((FacultyAdmin) user);
+                case "FacultyAdmin" -> new FacultyAdminDashboard((FacultyAdminModel) user);
                 case "SystemAdmin" -> new SystemAdminDashboard((SystemAdminModel) user);
             }
         } else {

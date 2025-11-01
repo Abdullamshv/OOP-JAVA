@@ -14,6 +14,11 @@ public class Feedback {
     public String getStudent() { return student; }
     public String getSupervisor() { return supervisor; }
     public String getComment() { return comment; }
+    
+    // Additional getter methods for compatibility
+    public String getStudentUsername() { return student; }
+    public String getSupervisorUsername() { return supervisor; }
+    public String getMessage() { return comment; }
 
     @Override
     public String toString() {

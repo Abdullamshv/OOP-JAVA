@@ -2,6 +2,7 @@ package apusystem.services;
 
 import apusystem.users.*;
 import apusystem.models.SystemAdminModel;
+import apusystem.models.FacultyAdminModel;
 import java.util.*;
 
 public class UserService {
@@ -48,7 +49,7 @@ public class UserService {
         return switch (role) {
             case "Student" -> new Student(username, password);
             case "Supervisor" -> new Supervisor(username, password);
-            case "FacultyAdmin" -> new FacultyAdmin(username, password);
+            case "FacultyAdmin" -> new FacultyAdminModel(username, password);
             case "SystemAdmin" -> new SystemAdminModel(username, password);
             default -> null;
         };
